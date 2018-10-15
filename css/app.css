@@ -81,6 +81,9 @@ h1 {
     font-size: 33px;
 }
 
+#timer{
+    padding-left: 30px;
+}
 /*
  * Styles for the Score Panel
  */

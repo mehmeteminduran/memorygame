@@ -7,20 +7,29 @@ const cardClassName = 'card';
 let listOfOpenedCards = [];
 let moveCount = 0;
 let moves = document.querySelector('.moves');
-
-// Get list of cards which are doubled and shuffled.
-let listOfCardTypes = shuffle(doubleArrayElements(distinctCardTypes)); 
-// Find container element 
-let container = document.querySelector('.container'); 
-// Add unordered list to container
-let unorderedList = document.createElement('ul');
-unorderedList.className = 'deck'; 
-// add each card's HTML to unordered list
-for (const cardType of listOfCardTypes) {
-    let card = createCardElement(cardType);
-    unorderedList.appendChild(card);
+let isStarted, isFinished = false;
+let startTime, endTime;
+// Create html of deck
+createDeck();
+// Add listener for restart button
+let restartDiv = document.querySelector('.restart');
+restartDiv.addEventListener('click', onRestartClicked);
+ 
+function createDeck() {
+    // Get list of cards which are doubled and shuffled.
+    let listOfCardTypes = shuffle(doubleArrayElements(distinctCardTypes));
+    // Find container element 
+    let container = document.querySelector('.container');
+    // Add unordered list to container
+    let unorderedList = document.createElement('ul');
+    unorderedList.className = 'deck';
+    // add each card's HTML to unordered list
+    for (const cardType of listOfCardTypes) {
+        let card = createCardElement(cardType);
+        unorderedList.appendChild(card);
+    }
+    container.appendChild(unorderedList);
 }
-container.appendChild(unorderedList);
 
 // Create card's html
 function createCardElement(cardClassName) {
@@ -57,10 +66,15 @@ function shuffle(array) {
 }
 
 // Card click Event
-function onCardClicked(event) { 
+function onCardClicked(event) {
+    if (!isStarted) {
+        isStarted = true;
+        startTime = performance.now();
+    }
+
     if (isCardOpenOrMatched(event.target)) {
         return;
-    } else { 
+    } else {
         increaseMoveCount();
         displayCardSymbol(event.target);
         setTimeout(function () {
@@ -70,13 +84,13 @@ function onCardClicked(event) {
 }
 
 // Check whether element or parent element has open or match class .İf so, do nothing.
-function isCardOpenOrMatched(target) { 
+function isCardOpenOrMatched(target) {
     return target.classList.contains(openCardClassName) || target.classList.contains(cardMatchClassName)
         || target.parentElement.classList.contains(openCardClassName) || target.parentElement.classList.contains(cardMatchClassName);
 }
 
 // open and show card
-function displayCardSymbol(target) { 
+function displayCardSymbol(target) {
     target.classList.add(showCardClassName);
     target.classList.add(openCardClassName);
 }
@@ -85,7 +99,7 @@ function displayCardSymbol(target) {
 function addToOpenedCardList(childElementClassName) {
     listOfOpenedCards.push(childElementClassName);
     if (listOfOpenedCards != null && listOfOpenedCards.length == 2) {
-        let openedCards = document.getElementsByClassName(openCardClassName); 
+        let openedCards = document.getElementsByClassName(openCardClassName);
         if (allTheSame(listOfOpenedCards)) {
             lockOpenedCards(openedCards);
         } else {
@@ -113,6 +127,7 @@ function lockOpenedCards(openedCards) {
     }
 
     if (isAllCardsMatched()) {
+        isFinished = true;
         alert('All cards are matched');
     }
 }
@@ -139,4 +154,43 @@ function increaseMoveCount() {
     moves.textContent = moveCount;
 }
 
-// TODO : Restart and star count
+// Restart the game
+function onRestartClicked() {
+    // Remove deck
+    var deck = document.querySelector('.deck');
+    deck.parentNode.removeChild(deck);
+    // Create deck
+    createDeck();
+    // Refresh move count
+    moveCount = 0;
+    moves.textContent = moveCount;
+    // Refresh Timer
+    startTime = 0;
+    endTime = 0;
+    isStarted = false;
+    isFinished = false;
+    document.getElementById("timer").textContent = '';
+}
+
+// Convert miliseconds to day,hour,minute,second
+function milisecondToTime(duration) {
+    var milliseconds = parseInt((duration % 1000) / 100),
+        seconds = parseInt((duration / 1000) % 60),
+        minutes = parseInt((duration / (1000 * 60)) % 60),
+        hours = parseInt((duration / (1000 * 60 * 60)) % 24);
+
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+    return hours + ":" + minutes + ":" + seconds;
+}
+
+// Calculate time in every 1 second
+let timer = setInterval(function () {
+    if (isStarted && !isFinished) {
+        endTime = performance.now();
+        let distance = endTime - startTime;
+        document.getElementById("timer").innerHTML = '<b>Time</b> : ' + milisecondToTime(distance);
+    }
+}, 1000);
