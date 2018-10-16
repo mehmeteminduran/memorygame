@@ -5,16 +5,23 @@ const showCardClassName = 'show';
 const openCardClassName = 'open';
 const cardClassName = 'card';
 let listOfOpenedCards = [];
-let moveCount = 0;
+let moveCount = 0, notMatchedMoveCount = 0;
 let moves = document.querySelector('.moves');
 let isStarted, isFinished = false;
 let startTime, endTime;
+let stars = document.getElementsByClassName('fa-star');
+let rates = document.getElementsByClassName('fa-star-o');
 // Create html of deck
 createDeck();
+
 // Add listener for restart button
 let restartDiv = document.querySelector('.restart');
 restartDiv.addEventListener('click', onRestartClicked);
- 
+
+// Calculate time in every 1 second after game begin
+let timer = setInterval(gameTimer, 1000);
+
+
 function createDeck() {
     // Get list of cards which are doubled and shuffled.
     let listOfCardTypes = shuffle(doubleArrayElements(distinctCardTypes));
@@ -104,8 +111,19 @@ function addToOpenedCardList(childElementClassName) {
             lockOpenedCards(openedCards);
         } else {
             closeOpenedCards(openedCards);
+            notMatchedMoveCount++;
+            reduceStars();
         }
         listOfOpenedCards = [];
+    }
+}
+
+function reduceStars() {
+    if ((stars.length == 5 && notMatchedMoveCount >= 5 && notMatchedMoveCount < 10) ||
+        (stars.length == 4 && notMatchedMoveCount >= 10 && notMatchedMoveCount < 15) ||
+        (stars.length == 3 && notMatchedMoveCount >= 15 && notMatchedMoveCount < 20) ||
+        (stars.length == 2 && notMatchedMoveCount >= 20)) {
+        stars[0].className = 'fa fa-star-o';
     }
 }
 
@@ -128,7 +146,7 @@ function lockOpenedCards(openedCards) {
 
     if (isAllCardsMatched()) {
         isFinished = true;
-        alert('All cards are matched');
+        alert('CONGRAGULATIONS:) \n All cards are matched...');
     }
 }
 
@@ -164,6 +182,11 @@ function onRestartClicked() {
     // Refresh move count
     moveCount = 0;
     moves.textContent = moveCount;
+    notMatchedMoveCount = 0;
+    //Refresh star rating
+    for (let i = 0; rates.length; i++) {
+        rates[0].className='fa fa-star'; 
+    }
     // Refresh Timer
     startTime = 0;
     endTime = 0;
@@ -186,11 +209,10 @@ function milisecondToTime(duration) {
     return hours + ":" + minutes + ":" + seconds;
 }
 
-// Calculate time in every 1 second
-let timer = setInterval(function () {
+function gameTimer() {
     if (isStarted && !isFinished) {
         endTime = performance.now();
         let distance = endTime - startTime;
         document.getElementById("timer").innerHTML = '<b>Time</b> : ' + milisecondToTime(distance);
     }
-}, 1000);
+}
