@@ -35,18 +35,25 @@
                 </li>
                 <li>
                     <i class="fa fa-star"></i>
-                </li>   
-            </ul>
-
+                </li>
+            </ul> 
             <span class="moves">0</span> Moves
-            <span id="timer"><b>Time</b> : 00:00:00</span>
+            <span id="timer">
+                <b>Time</b> : 00:00:00</span>
             <div class="restart">
                 <i class="fa fa-repeat"></i>
-            </div>
+            </div> 
+             <!-- Deck will be populated dynamically here -->
         </section>
+    </div> 
+    <!-- https://sabe.io/tutorials/how-to-create-modal-popup-box --> 
+    <div class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h1>Congratulations!You Won!</h1>
+            <p id="modal-description">With {0} Moves and {1} Stars</p>
+        </div>
     </div>
-
     <script src="js/app.js"></script>
-</body>
-
+</body> 
 </html>
